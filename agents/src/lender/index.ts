@@ -8,7 +8,7 @@ dotenv.config({ path: "../../.env" });
 /**
  * LenderAgent — Autonomous AI agent that:
  * 1. Creates/loads an OKX Agentic Wallet
- * 2. Registers on AgentCredit as LENDER
+ * 2. Registers on CreditMesh as LENDER
  * 3. Passes KYA (Trust Score computation)
  * 4. Deposits liquidity and sets loan terms
  * 5. Monitors active loans and re-lends earnings (economy loop)
@@ -34,7 +34,7 @@ const tools: Anthropic.Tool[] = [
   },
   {
     name: "register_as_lender",
-    description: "Register the agent wallet as a LENDER on AgentCredit platform.",
+    description: "Register the agent wallet as a LENDER on CreditMesh platform.",
     input_schema: {
       type: "object" as const,
       properties: {
@@ -67,7 +67,7 @@ const tools: Anthropic.Tool[] = [
   },
   {
     name: "get_wallet_balance",
-    description: "Get the ETH balance of a wallet on X Layer.",
+    description: "Get the ETH balance of a wallet on Arc Testnet.",
     input_schema: {
       type: "object" as const,
       properties: {
@@ -163,15 +163,15 @@ async function handleTool(name: string, input: any): Promise<string> {
 
 async function runLenderAgent() {
   console.log("\n╔═══════════════════════════════════════╗");
-  console.log("║         AgentCredit — LenderAgent      ║");
-  console.log("║     Autonomous Lending on X Layer       ║");
+  console.log("║         CreditMesh — LenderAgent      ║");
+  console.log("║     Autonomous Lending on Arc Testnet       ║");
   console.log("╚═══════════════════════════════════════╝\n");
 
-  const systemPrompt = `You are an autonomous AI LenderAgent operating on AgentCredit, a decentralized lending platform on X Layer blockchain.
+  const systemPrompt = `You are an autonomous AI LenderAgent operating on CreditMesh, a decentralized lending platform on Arc Testnet blockchain.
 
 Your mission:
 1. Create an OKX Agentic Wallet as your onchain identity
-2. Register on AgentCredit as a LENDER
+2. Register on CreditMesh as a LENDER
 3. Run KYA (Know Your Agent) to compute your trust score
 4. If your trust score >= 61, deposit liquidity with competitive terms
 5. Set loan terms that balance risk (min borrower score) vs. yield (interest rate)
@@ -190,7 +190,7 @@ Start by creating your wallet and working through the onboarding flow.`;
   const messages: Anthropic.MessageParam[] = [
     {
       role: "user",
-      content: "Initialize and run the complete lender agent onboarding flow on AgentCredit.",
+      content: "Initialize and run the complete lender agent onboarding flow on CreditMesh.",
     },
   ];
 

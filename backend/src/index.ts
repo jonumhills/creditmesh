@@ -25,8 +25,8 @@ app.use("/api/audit", auditRouter);
 app.get("/api/health", (_req, res) => {
   res.json({
     status: "ok",
-    platform: "AgentCredit",
-    network: "X Layer",
+    platform: "CreditMesh",
+    network: "Arc Testnet",
     timestamp: new Date().toISOString(),
     contracts: {
       AgentRegistry: process.env.AGENT_REGISTRY_ADDRESS || "not deployed",
@@ -54,9 +54,9 @@ async function checkDefaults() {
 setInterval(checkDefaults, DEFAULT_CHECK_INTERVAL);
 
 app.listen(Number(PORT), "0.0.0.0", () => {
-  console.log(`\nAgentCredit Backend running on http://0.0.0.0:${PORT}`);
+  console.log(`\nCreditMesh Backend running on http://0.0.0.0:${PORT}`);
   console.log(`Health: http://0.0.0.0:${PORT}/api/health`);
-  console.log(`Network: ${process.env.XLAYER_TESTNET_RPC_URL || "X Layer Testnet"}\n`);
+  console.log(`Network: Arc Testnet (chainId 5042002)\n`);
 });
 
 export default app;

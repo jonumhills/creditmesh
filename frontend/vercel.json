@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://agentcreditbackend-production.up.railway.app/api/:path*"
+      "destination": "https://agentcreditbackend-production-4d07.up.railway.app/api/:path*"
     },
     {
       "source": "/(.*)",

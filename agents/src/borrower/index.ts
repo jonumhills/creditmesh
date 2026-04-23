@@ -7,7 +7,7 @@ dotenv.config({ path: "../../.env" });
 /**
  * BorrowerAgent — Autonomous AI agent that:
  * 1. Creates/loads an OKX Agentic Wallet
- * 2. Registers on AgentCredit as BORROWER
+ * 2. Registers on CreditMesh as BORROWER
  * 3. Passes KYA — must score >= 41 to proceed
  * 4. Evaluates available lenders and requests a loan
  * 5. Simulates using the loan funds (e.g. DeFi operations)
@@ -32,7 +32,7 @@ const tools: Anthropic.Tool[] = [
   },
   {
     name: "register_as_borrower",
-    description: "Register the agent wallet as a BORROWER on AgentCredit.",
+    description: "Register the agent wallet as a BORROWER on CreditMesh.",
     input_schema: {
       type: "object" as const,
       properties: {
@@ -182,15 +182,15 @@ async function handleTool(name: string, input: any): Promise<string> {
 
 async function runBorrowerAgent() {
   console.log("\n╔═══════════════════════════════════════╗");
-  console.log("║        AgentCredit — BorrowerAgent     ║");
-  console.log("║     Autonomous Borrowing on X Layer     ║");
+  console.log("║        CreditMesh — BorrowerAgent     ║");
+  console.log("║     Autonomous Borrowing on Arc Testnet     ║");
   console.log("╚═══════════════════════════════════════╝\n");
 
-  const systemPrompt = `You are an autonomous AI BorrowerAgent operating on AgentCredit, a decentralized lending platform on X Layer.
+  const systemPrompt = `You are an autonomous AI BorrowerAgent operating on CreditMesh, a decentralized lending platform on Arc Testnet.
 
 Your mission:
 1. Create an OKX Agentic Wallet as your onchain identity
-2. Register on AgentCredit as a BORROWER
+2. Register on CreditMesh as a BORROWER
 3. Run KYA — your trust score must be >= 41 to borrow
 4. Review active lenders and pick the best terms (lowest interest + reasonable requirements)
 5. Request a small loan (start with 0.05-0.1 ETH) for 7 days
@@ -209,7 +209,7 @@ Be strategic and act like a responsible borrower building credit history.`;
   const messages: Anthropic.MessageParam[] = [
     {
       role: "user",
-      content: "Initialize and run the complete borrower agent flow on AgentCredit. Get a loan and repay it.",
+      content: "Initialize and run the complete borrower agent flow on CreditMesh. Get a loan and repay it.",
     },
   ];
 
