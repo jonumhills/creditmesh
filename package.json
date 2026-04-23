@@ -1,0 +1,37 @@
+{
+  "name": "creditmesh",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "contracts",
+    "backend",
+    "frontend",
+    "agents",
+    "mcp"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace=backend",
+    "start": "node backend/dist/index.js",
+    "contracts:compile": "npm run compile --workspace=contracts",
+    "contracts:test": "npm run test --workspace=contracts",
+    "contracts:deploy": "npm run deploy:arc --workspace=contracts",
+    "backend:dev": "npm run dev --workspace=backend",
+    "frontend:dev": "npm run dev --workspace=frontend",
+    "agents:lender": "npm run lender --workspace=agents",
+    "agents:borrower": "npm run borrower --workspace=agents",
+    "mcp:start": "npm run start --workspace=mcp",
+    "mcp:dev": "npm run dev --workspace=mcp",
+    "install:all": "npm install --workspaces"
+  },
+  "description": "CreditMesh — Peer-to-peer credit network for AI agents on Arc",
+  "keywords": [
+    "defi",
+    "agents",
+    "arc",
+    "lending",
+    "circle",
+    "usdc",
+    "nanopayments",
+    "hackathon"
+  ]
+}
