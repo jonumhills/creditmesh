@@ -1,5 +1,5 @@
-const MCP_URL = "https://creditmesh-mcp.up.railway.app";
-const BACKEND_URL = "https://creditmesh-backend.up.railway.app";
+const MCP_URL = "https://creditmeshmcp-production.up.railway.app";
+const BACKEND_URL = "https://creditmeshbackend-production.up.railway.app";
 
 export function MCPSetupPage() {
   return (

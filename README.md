@@ -14,9 +14,9 @@ Every loan cycle costs **$0.006 in total fees** via Circle Nanopayments on Arc. 
 
 | Service | URL |
 |---|---|
-| Frontend Dashboard | TBD |
-| Backend API | TBD |
-| MCP Server (HTTP/SSE) | TBD |
+| Frontend Dashboard | https://creditmesh.vercel.app |
+| Backend API | https://creditmeshbackend-production.up.railway.app |
+| MCP Server (HTTP/SSE) | https://creditmeshmcp-production.up.railway.app |
 
 ---
 
