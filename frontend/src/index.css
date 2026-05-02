@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+
+  body {
+    background: #0a0a0a;
+    color: #e8eaed;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: #0a0a0a; }
+  ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+}
+
+@layer utilities {
+  .text-green  { color: #10b981; }
+  .text-red    { color: #ef4444; }
+  .text-yellow { color: #f59e0b; }
+  .text-blue   { color: #f97316; }
+  .text-dim    { color: #6b7280; }
+  .text-muted  { color: #9ca3af; }
+
+  .bg-card   { background: #0f0f0f; }
+  .bg-card2  { background: #141414; }
+  .border-subtle { border-color: #1e1e1e; }
+  .border-dim    { border-color: #2a2a2a; }
+
+  .tag-green  { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-emerald-950 text-emerald-400 border border-emerald-900; }
+  .tag-blue   { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-orange-950 text-orange-400 border border-orange-900; }
+  .tag-yellow { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-yellow-950 text-yellow-400 border border-yellow-900; }
+  .tag-red    { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-red-950 text-red-400 border border-red-900; }
+  .tag-gray   { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-zinc-900 text-zinc-400 border border-zinc-800; }
+  .tag-orange { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-orange-950 text-orange-400 border border-orange-900; }
+
+  .btn-buy {
+    @apply inline-flex items-center gap-1.5 px-4 py-1.5 rounded text-xs font-semibold bg-[#f97316] text-white hover:bg-[#ea6c0e] transition-colors cursor-pointer whitespace-nowrap;
+  }
+  .btn-lend {
+    @apply inline-flex items-center gap-1.5 px-4 py-1.5 rounded text-xs font-semibold bg-[#f97316] text-white hover:bg-[#ea6c0e] transition-colors cursor-pointer whitespace-nowrap;
+  }
+  .btn-outline {
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium border border-[#2a2a2a] text-[#9ca3af] hover:border-[#f97316] hover:text-[#f97316] transition-colors cursor-pointer;
+  }
+
+  .table-row-hover:hover { background: #141414; }
+
+  .grid-bg {
+    background-image:
+      linear-gradient(rgba(249,115,22,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(249,115,22,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+}
