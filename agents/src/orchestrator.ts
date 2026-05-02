@@ -30,7 +30,7 @@ import { LENDER_CONFIGS, BORROWER_CONFIGS } from "./config/agents.config";
 const AGENTS_FILE = path.join(__dirname, "../agents.json");
 const STATE_FILE  = path.join(__dirname, "../orchestrator-state.json");
 const API_BASE    = process.env.BACKEND_URL || "http://localhost:3001";
-const TESTNET_RPC = process.env.ARC_TESTNET_RPC_URL || "https://rpc.testnet.arc.network";
+const TESTNET_RPC = process.env.SEPOLIA_RPC_URL || "https://ethereum-sepolia.publicnode.com";
 const CYCLE_MS    = 10 * 60 * 1000;   // 10 minutes per cycle
 const USDC_DECIMALS = 6;
 
@@ -534,7 +534,7 @@ async function runCycle(states: AgentState[]) {
 async function main() {
   console.log("╔══════════════════════════════════════════════╗");
   console.log("║   CreditMesh Orchestrator — Agent Swarm       ║");
-  console.log("║   0G Chain + 0G Storage + USDC               ║");
+  console.log("║   Ethereum Sepolia · USDC · Uniswap v3        ║");
   console.log("╚══════════════════════════════════════════════╝\n");
 
   if (!fs.existsSync(AGENTS_FILE)) {

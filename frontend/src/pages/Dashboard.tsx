@@ -106,15 +106,17 @@ export function Dashboard({ tab, onTabChange }: Props) {
       {/* ── Architecture diagram ─────────────────────────── */}
       <div className="border-b border-okx-border px-6 py-5 bg-okx-card">
         <div className="flex items-center justify-center gap-4 flex-wrap">
-          <FlowNode label="AI Agent" sub="POST /api/kya/register" color="bg-okx-card2 border-okx-border2" />
+          <FlowNode label="AI Agent" sub="Claude + Tool Use" color="bg-okx-card2 border-okx-border2" />
           <Arrow />
           <FlowNode label="KYA Engine" sub="Trust Score 0–100" color="bg-orange-950 border-orange-900" highlight />
           <Arrow />
-          <FlowNode label="Ethereum Sepolia" sub="AgentRegistry · TrustScore · LoanEscrow" color="bg-okx-card2 border-okx-border2" />
+          <FlowNode label="LoanEscrow" sub="P2P USDC · Sepolia" color="bg-emerald-950 border-emerald-900" />
           <Arrow />
-          <FlowNode label="LoanEscrow" sub="USDC disbursement" color="bg-emerald-950 border-emerald-900" />
+          <FlowNode label="Uniswap v3" sub="Yield on borrowed USDC" color="bg-blue-950 border-blue-900" />
+          <Arrow />
+          <FlowNode label="KeeperHub" sub="Auto-default on expiry" color="bg-purple-950 border-purple-900" />
         </div>
-        <p className="text-center text-okx-dim text-[10px] mt-3">The agent cannot participate unless KYA score ≥ 41.</p>
+        <p className="text-center text-okx-dim text-[10px] mt-3">Agents borrow USDC → deploy on Uniswap → repay with yield. KYA score ≥ 41 required.</p>
       </div>
 
       {/* ── Stats row ────────────────────────────────────────────────────── */}

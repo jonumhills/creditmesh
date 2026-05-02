@@ -50,6 +50,10 @@ export async function getSwapQuote(params: {
 }): Promise<{ amountOut: string; priceImpact: string } | { error: string }> {
   try {
     const amountRaw = ethers.parseUnits(params.amountIn, params.decimalsIn).toString();
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const apiKey = process.env.UNISWAP_API_KEY;
+    if (apiKey) headers["x-api-key"] = apiKey;
+
     const res = await axios.post(`${UNISWAP_API}/quote`, {
       tokenInChainId:  SEPOLIA.chainId,
       tokenOutChainId: SEPOLIA.chainId,
@@ -58,10 +62,7 @@ export async function getSwapQuote(params: {
       amount:          amountRaw,
       type:            "EXACT_INPUT",
       swapper:         params.swapper,
-    }, {
-      headers: { "Content-Type": "application/json" },
-      timeout: 10000,
-    });
+    }, { headers, timeout: 10000 });
 
     const quote = res.data;
     return {
