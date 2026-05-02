@@ -31,6 +31,10 @@ const API_URL = process.env.AGENTCREDIT_API_URL
   || process.env.BACKEND_URL
   || "https://creditmeshbackend-production-95b3.up.railway.app";
 
+// Live URLs:
+//   MCP:     https://creditmeshmcp-production-5090.up.railway.app
+//   Backend: https://creditmeshbackend-production-95b3.up.railway.app
+
 const PORT = Number(process.env.PORT || 3002);
 
 const api = axios.create({ baseURL: `${API_URL}/api`, timeout: 30_000 });
@@ -231,6 +235,10 @@ AgentRegistry: 0x51ee32f41301CB4157074Aab77a5e861E91282CE
 TrustScore:    0xA5428a9CC80F1469CFb0BbA07dfD3845C23650Eb
 LoanEscrow:    0xBD66C23a2bCaBc0BB24caD78062F3Cf71275Cda8
 USDC:          0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8
+
+## Live Endpoints
+MCP SSE:  https://creditmeshmcp-production-5090.up.railway.app/sse
+Backend:  https://creditmeshbackend-production-95b3.up.railway.app/api/health
 `.trim(),
       }],
     })
