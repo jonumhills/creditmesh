@@ -8,7 +8,7 @@ import kyaRouter from "./routes/kya";
 import loansRouter from "./routes/loans";
 import agentsRouter from "./routes/agents";
 import auditRouter from "./routes/audit";
-import { LoanManager } from "./services/loanManager";
+import keeperRouter from "./routes/keeper";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -21,6 +21,7 @@ app.use("/api/kya", kyaRouter);
 app.use("/api/loans", loansRouter);
 app.use("/api/agents", agentsRouter);
 app.use("/api/audit", auditRouter);
+app.use("/api/keeper", keeperRouter);
 
 app.get("/api/health", (_req, res) => {
   res.json({
@@ -36,22 +37,6 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
-// ── Background: check for defaulted loans every 5 minutes ─────────────────
-const loanManager = new LoanManager();
-const DEFAULT_CHECK_INTERVAL = 5 * 60 * 1000;
-
-async function checkDefaults() {
-  try {
-    const defaulted = await loanManager.checkAndMarkDefaults();
-    if (defaulted.length > 0) {
-      console.log(`[Default Monitor] Marked ${defaulted.length} loan(s) as defaulted:`, defaulted);
-    }
-  } catch (err) {
-    // Contracts may not be deployed yet
-  }
-}
-
-setInterval(checkDefaults, DEFAULT_CHECK_INTERVAL);
 
 app.listen(Number(PORT), "0.0.0.0", () => {
   console.log(`\nCreditMesh Backend running on http://0.0.0.0:${PORT}`);

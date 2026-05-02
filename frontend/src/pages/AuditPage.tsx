@@ -1,6 +1,15 @@
 import { useState, useEffect } from "react";
 import { api } from "../utils/api";
 
+interface KeeperStatus {
+  service: string;
+  jobName: string;
+  schedule: string;
+  description: string;
+  webhookUrl: string;
+  lastRun: { timestamp: string | null; defaulted: number[]; message?: string; error?: string };
+}
+
 interface AuditData {
   contracts: Record<string, { address: string; explorerUrl: string; verified?: boolean }>;
   deployer: string;
@@ -22,14 +31,18 @@ interface AuditData {
 const EXPLORER = "https://sepolia.etherscan.io";
 
 export function AuditPage() {
-  const [data, setData]       = useState<AuditData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState<string | null>(null);
+  const [data, setData]             = useState<AuditData | null>(null);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState<string | null>(null);
+  const [keeper, setKeeper]         = useState<KeeperStatus | null>(null);
 
   useEffect(() => {
     api.get<AuditData>("/audit")
       .then((r) => { setData(r.data); setLoading(false); })
       .catch((e) => { setError(e.message); setLoading(false); });
+    api.get<KeeperStatus>("/keeper/status")
+      .then((r) => setKeeper(r.data))
+      .catch(() => {/* non-fatal */});
   }, []);
 
   if (loading) return (
@@ -164,6 +177,53 @@ export function AuditPage() {
             </table>
           </div>
         )}
+      </Section>
+
+      {/* KeeperHub Automation */}
+      <Section title="Automation — Powered by KeeperHub">
+        <div className="rounded-lg border border-okx-border bg-okx-card divide-y divide-okx-border">
+          <div className="flex items-center justify-between px-4 py-3">
+            <div>
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="w-2 h-2 rounded-full bg-okx-green animate-pulse inline-block" />
+                <span className="text-white text-sm font-medium">Default Monitor</span>
+                <span className="px-1.5 py-0.5 rounded text-[10px] bg-purple-950 text-purple-400 border border-purple-900">KeeperHub</span>
+              </div>
+              <div className="text-okx-dim text-xs">{keeper?.description || "Scans active loans every 5 min and marks expired ones as DEFAULTED onchain"}</div>
+            </div>
+            <div className="text-right shrink-0 ml-4">
+              <div className="text-okx-orange font-mono text-xs">{keeper?.schedule || "*/5 * * * *"}</div>
+              <div className="text-okx-dim text-[10px] mt-0.5">cron schedule</div>
+            </div>
+          </div>
+          <div className="px-4 py-3 grid grid-cols-2 gap-4 text-xs">
+            <div>
+              <div className="text-okx-dim mb-1">Last Triggered</div>
+              <div className="text-white font-mono">
+                {keeper?.lastRun?.timestamp
+                  ? new Date(keeper.lastRun.timestamp).toLocaleString()
+                  : "Waiting for first run"}
+              </div>
+            </div>
+            <div>
+              <div className="text-okx-dim mb-1">Defaults Marked</div>
+              <div className={`font-mono font-bold ${(keeper?.lastRun?.defaulted?.length ?? 0) > 0 ? "text-okx-red" : "text-okx-green"}`}>
+                {keeper?.lastRun?.defaulted?.length ?? 0}
+              </div>
+            </div>
+          </div>
+          <div className="px-4 py-3 text-xs">
+            <div className="text-okx-dim mb-1">Webhook Endpoint</div>
+            <div className="font-mono text-okx-orange truncate">{keeper?.webhookUrl || "POST /api/keeper/trigger"}</div>
+          </div>
+        </div>
+        <div className="mt-2 px-4 py-2.5 rounded-lg border border-okx-border bg-okx-card2 text-xs text-okx-dim">
+          <span className="text-white font-medium">How it works: </span>
+          KeeperHub calls the webhook every 5 minutes. The backend scans
+          all <code className="text-okx-orange">ACTIVE</code> loans and calls{" "}
+          <code className="text-okx-orange">LoanEscrow.markDefault(loanId)</code> for any past their
+          due date. Borrower trust score is penalised <span className="text-okx-red">−20 pts</span> onchain.
+        </div>
       </Section>
 
       {/* Verification note */}
