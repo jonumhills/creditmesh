@@ -65,3 +65,14 @@ export const registerAgent = (wallet: string, role: "LENDER" | "BORROWER") =>
 
 export const fetchHealth = () =>
   api.get("/health").then((r) => r.data);
+
+export interface AgentENS {
+  wallet: string;
+  ensName: string | null;
+  subnodeName: string | null;
+  textRecords: Record<string, string>;
+  node: string | null;
+}
+
+export const fetchAgentENS = (wallet: string) =>
+  api.get<AgentENS>(`/agents/${wallet}/ens`).then((r) => r.data);

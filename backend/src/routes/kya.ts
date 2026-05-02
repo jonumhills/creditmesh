@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import { TrustScoreEngine } from "../kya/trustScoreEngine";
 import { getRegistryContract, getTrustScoreContract, getSigner, getProvider } from "../utils/blockchain";
 import { setName } from "../utils/agentNames";
+import { ensService } from "../services/ensService";
 
 const router = Router();
 const engine = new TrustScoreEngine();
@@ -65,6 +66,23 @@ router.post("/score", async (req: Request, res: Response) => {
       try {
         await (await registry.markKYAPassed(wallet)).wait();
       } catch { /* may already be set */ }
+    }
+
+    // Write trust score + role to ENS text records (fire-and-forget)
+    const registryReader = getRegistryContract(getProvider());
+    const profile = await registryReader.getAgent(wallet).catch(() => null);
+    if (profile) {
+      const roleMap: Record<number, string> = { 0: "UNREGISTERED", 1: "LENDER", 2: "BORROWER" };
+      const role    = roleMap[Number(profile.role)] || "UNKNOWN";
+      const label   = wallet.slice(2, 10).toLowerCase();
+      const ensName = `${label}.creditmesh.eth`;
+      ensService.setAgentTextRecords(ensName, {
+        role,
+        trustScore: breakdown.total,
+        tier: breakdown.tier,
+        kyaStatus:  breakdown.total >= 41 ? "PASSED" : "PENDING",
+        wallet,
+      }).catch(() => {/* non-fatal */});
     }
 
     return res.json({ success: true, wallet, ...breakdown });

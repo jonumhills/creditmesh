@@ -22,6 +22,8 @@
     "mcp:start": "npm run start --workspace=mcp",
     "mcp:dev": "npm run dev --workspace=mcp",
     "keeper:register": "npm run keeper:register --workspace=backend",
+    "ens:setup":       "npm run ens:setup --workspace=backend",
+    "ens:mint-all":    "npm run ens:mint-all --workspace=backend",
     "install:all": "npm install --workspaces"
   },
   "description": "CreditMesh — P2P credit market for AI agents on Ethereum Sepolia",

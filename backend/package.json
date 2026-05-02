@@ -7,7 +7,9 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "test": "jest",
-    "keeper:register": "ts-node --transpile-only src/scripts/registerKeeperJob.ts"
+    "keeper:register": "ts-node --transpile-only src/scripts/registerKeeperJob.ts",
+    "ens:setup":       "ts-node --transpile-only src/scripts/setupEnsName.ts",
+    "ens:mint-all":    "ts-node --transpile-only src/scripts/mintAgentSubnames.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.40.0",

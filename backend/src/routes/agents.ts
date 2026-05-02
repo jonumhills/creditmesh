@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import { getRegistryContract, getTrustScoreContract, getLoanEscrowContract, getProvider } from "../utils/blockchain";
 import { ethers } from "ethers";
 import { getName } from "../utils/agentNames";
+import { ensService } from "../services/ensService";
 
 const router = Router();
 
@@ -114,6 +115,20 @@ router.get("/:wallet", async (req: Request, res: Response) => {
       },
       loanIds: loans.map(Number),
     });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/agents/:wallet/ens
+ * Get ENS identity for an agent: reverse name, subname, text records.
+ */
+router.get("/:wallet/ens", async (req: Request, res: Response) => {
+  try {
+    const { wallet } = req.params;
+    const data = await ensService.getAgentENS(wallet);
+    return res.json({ wallet, ...data });
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
   }

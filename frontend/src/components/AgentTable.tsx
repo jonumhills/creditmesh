@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import type { Agent } from "../utils/api";
+import type { Agent, AgentENS } from "../utils/api";
+import { fetchAgentENS } from "../utils/api";
 import { KYAChecks } from "./KYAChecks";
 
 interface Props {
@@ -109,6 +110,15 @@ function AgentRow({ agent, onRunKYA, copied, onCopy }: {
   onCopy: (addr: string) => void;
 }) {
   const navigate = useNavigate();
+  const [ens, setEns] = useState<AgentENS | null>(null);
+
+  useEffect(() => {
+    fetchAgentENS(agent.wallet)
+      .then(setEns)
+      .catch(() => null);
+  }, [agent.wallet]);
+
+  const displayName = ens?.ensName || ens?.subnodeName || null;
   const timeAgo = (iso: string) => {
     const diff = Date.now() - new Date(iso).getTime();
     const m = Math.floor(diff / 60000);
@@ -131,10 +141,15 @@ function AgentRow({ agent, onRunKYA, copied, onCopy }: {
             {agent.name ? agent.name.slice(0, 2).toUpperCase() : roleIcon(agent.role)}
           </div>
           <div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 flex-wrap">
               {agent.name && <span className="text-white font-medium">{agent.name}</span>}
+              {displayName && (
+                <span className="px-1.5 py-0.5 rounded text-[10px] bg-blue-950 text-blue-400 border border-blue-900 font-mono">
+                  ◎ {displayName}
+                </span>
+              )}
               <a href={`${EXPLORER}/address/${agent.wallet}`} target="_blank" rel="noreferrer"
-                className={`hover:text-okx-orange transition-colors font-mono ${agent.name ? "text-okx-dim text-[10px]" : "text-white font-medium"}`}>
+                className={`hover:text-okx-orange transition-colors font-mono ${agent.name || displayName ? "text-okx-dim text-[10px]" : "text-white font-medium"}`}>
                 {short(agent.wallet)}
               </a>
               <button

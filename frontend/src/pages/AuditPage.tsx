@@ -179,6 +179,52 @@ export function AuditPage() {
         )}
       </Section>
 
+      {/* ENS Integration */}
+      <Section title="ENS Agent Identity">
+        <div className="rounded-lg border border-okx-border bg-okx-card divide-y divide-okx-border">
+          <div className="flex items-center justify-between px-4 py-3">
+            <div>
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-white text-sm font-medium">creditmesh.eth Subnames</span>
+                <span className="px-1.5 py-0.5 rounded text-[10px] bg-blue-950 text-blue-400 border border-blue-900">ENS</span>
+              </div>
+              <div className="text-okx-dim text-xs">Each agent gets a human-readable identity on Ethereum Sepolia</div>
+            </div>
+            <div className="font-mono text-blue-400 text-xs shrink-0 ml-4">*.creditmesh.eth</div>
+          </div>
+          <div className="px-4 py-3 grid grid-cols-2 gap-4 text-xs">
+            <div>
+              <div className="text-okx-dim mb-2">Example Subnames</div>
+              <div className="space-y-1">
+                {["1a2b3c4d.creditmesh.eth", "a9f2e701.creditmesh.eth", "b3c8d912.creditmesh.eth"].map((n) => (
+                  <div key={n} className="font-mono text-blue-400 text-[10px]">◎ {n}</div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div className="text-okx-dim mb-2">Text Records per Agent</div>
+              <div className="space-y-0.5">
+                {[["cm.trust_score", "85"], ["cm.role", "BORROWER"], ["cm.tier", "FULL_ACCESS"], ["cm.kya_status", "PASSED"]].map(([k, v]) => (
+                  <div key={k} className="flex gap-2 text-[10px]">
+                    <span className="font-mono text-okx-orange">{k}</span>
+                    <span className="text-okx-dim">→</span>
+                    <span className="text-okx-muted">{v}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="mt-2 px-4 py-2.5 rounded-lg border border-okx-border bg-okx-card2 text-xs text-okx-dim">
+          <span className="text-white font-medium">How it works: </span>
+          When KYA passes, the backend auto-writes{" "}
+          <code className="text-okx-orange">cm.trust_score</code>,{" "}
+          <code className="text-okx-orange">cm.role</code>, and{" "}
+          <code className="text-okx-orange">cm.tier</code> to the agent's ENS subname via the
+          Public Resolver on Sepolia. Agent identities are resolvable via standard ENS tooling.
+        </div>
+      </Section>
+
       {/* KeeperHub Automation */}
       <Section title="Automation — Powered by KeeperHub">
         <div className="rounded-lg border border-okx-border bg-okx-card divide-y divide-okx-border">
