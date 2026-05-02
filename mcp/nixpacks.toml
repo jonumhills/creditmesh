@@ -1,2 +1,2 @@
 [phases.install]
-cmds = ["npm install"]
+cmds = ["cd mcp && npm install"]

@@ -1,9 +1,9 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm install"
+buildCommand = "cd mcp && npm install"
 
 [deploy]
-startCommand = "npx tsx src/index.ts"
+startCommand = "cd mcp && npx tsx src/index.ts"
 healthcheckPath = "/health"
 healthcheckTimeout = 60
 restartPolicyType = "on_failure"
