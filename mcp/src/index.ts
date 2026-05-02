@@ -29,7 +29,7 @@ dotenv.config({ path: path.join(__dirname, "../../../.env") });
 
 const API_URL = process.env.AGENTCREDIT_API_URL
   || process.env.BACKEND_URL
-  || "https://creditmeshbackend-production.up.railway.app";
+  || "https://creditmeshbackend-production-95b3.up.railway.app";
 
 const PORT = Number(process.env.PORT || 3002);
 
