@@ -96,19 +96,27 @@ export class LoanManager {
     }
   }
 
-  async getAllLoans(): Promise<any[]> {
+  async getLoansPage(limit = 20, offset = 0): Promise<{ loans: any[]; total: number; hasMore: boolean }> {
     const escrow = getLoanEscrowContract();
     const total = Number(await (escrow as any).nextLoanId?.() ?? 0);
-    if (total === 0) return [];
+    if (total === 0) return { loans: [], total: 0, hasMore: false };
 
-    const results = await Promise.allSettled(
-      Array.from({ length: total }, (_, i) => this.getLoanDetails(i))
-    );
+    // Newest first: start from (total-1-offset) down
+    const start = total - 1 - offset;
+    const ids: number[] = [];
+    for (let i = start; i >= 0 && ids.length < limit; i--) ids.push(i);
 
-    return results
-      .filter((r): r is PromiseFulfilledResult<any> => r.status === "fulfilled")
-      .map(r => r.value)
-      .sort((a: any, b: any) => b.id - a.id);
+    const BATCH = 5;
+    const all: any[] = [];
+    for (let i = 0; i < ids.length; i += BATCH) {
+      const chunk = ids.slice(i, i + BATCH);
+      const results = await Promise.allSettled(chunk.map(id => this.getLoanDetails(id)));
+      for (const r of results) {
+        if (r.status === "fulfilled") all.push(r.value);
+      }
+    }
+
+    return { loans: all, total, hasMore: offset + ids.length < total };
   }
 
   async checkAndMarkDefaults(): Promise<number[]> {

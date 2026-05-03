@@ -6,18 +6,40 @@ const EXPLORER = "https://sepolia.etherscan.io";
 const short = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
 type NameMap = Record<string, string>;
+const PAGE_SIZE = 20;
 
 export function LoansPage() {
-  const [loans, setLoans]     = useState<Loan[]>([]);
-  const [names, setNames]     = useState<NameMap>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState<string | null>(null);
-  const [filter, setFilter]   = useState<"ALL" | "ACTIVE" | "REPAID" | "DEFAULTED">("ALL");
+  const [loans, setLoans]         = useState<Loan[]>([]);
+  const [total, setTotal]         = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [names, setNames]         = useState<NameMap>({});
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState<string | null>(null);
+  const [filter, setFilter]       = useState<"ALL" | "ACTIVE" | "REPAID" | "DEFAULTED">("ALL");
+
+  const loadAllPages = useCallback(async (nameMap: NameMap) => {
+    let offset = PAGE_SIZE;
+    let accumulated: Loan[] = [];
+    let hasMore = true;
+    setLoadingMore(true);
+    while (hasMore) {
+      try {
+        const res = await api.get<{ total: number; loans: Loan[]; hasMore: boolean }>(
+          `/loans?limit=${PAGE_SIZE}&offset=${offset}`
+        );
+        accumulated = [...accumulated, ...res.data.loans];
+        setLoans(prev => [...prev, ...res.data.loans]);
+        hasMore = res.data.hasMore;
+        offset += PAGE_SIZE;
+      } catch { break; }
+    }
+    setLoadingMore(false);
+  }, []);
 
   const load = useCallback(async () => {
     try {
-      const [loansRes, agentsRes] = await Promise.all([
-        api.get<{ total: number; loans: Loan[] }>("/loans"),
+      const [firstPage, agentsRes] = await Promise.all([
+        api.get<{ total: number; loans: Loan[]; hasMore: boolean }>(`/loans?limit=${PAGE_SIZE}&offset=0`),
         api.get("/agents"),
       ]);
 
@@ -26,16 +48,19 @@ export function LoansPage() {
         if (a.name) nameMap[a.wallet.toLowerCase()] = a.name;
       }
       setNames(nameMap);
-      setLoans(loansRes.data.loans ?? []);
+      setTotal(firstPage.data.total);
+      setLoans(firstPage.data.loans ?? []);
       setError(null);
+      setLoading(false);
+
+      if (firstPage.data.hasMore) loadAllPages(nameMap);
     } catch (e: any) {
       setError(e.message);
-    } finally {
       setLoading(false);
     }
-  }, []);
+  }, [loadAllPages]);
 
-  useEffect(() => { load(); const t = setInterval(load, 15000); return () => clearInterval(t); }, [load]);
+  useEffect(() => { load(); }, [load]);
 
   const filtered = filter === "ALL" ? loans : loans.filter(l => l.status === filter);
   const active   = loans.filter(l => l.status === "ACTIVE").length;
@@ -53,7 +78,7 @@ export function LoansPage() {
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <SummaryCard label="Total Loans"   value={loans.length} />
+        <SummaryCard label="Total Loans"   value={total || loans.length} loading={loadingMore} />
         <SummaryCard label="Active"        value={active}   color="text-okx-orange" />
         <SummaryCard label="Repaid"        value={repaid}   color="text-okx-green" />
         <SummaryCard label="Defaulted"     value={defaulted} color={defaulted > 0 ? "text-okx-red" : "text-okx-green"} />
@@ -103,6 +128,12 @@ export function LoansPage() {
               {filtered.map(loan => <LoanRow key={loan.id} loan={loan} names={names} />)}
             </tbody>
           </table>
+          {loadingMore && (
+            <div className="flex items-center justify-center gap-2 py-3 border-t border-okx-border text-okx-dim text-xs">
+              <div className="w-3 h-3 border border-okx-border border-t-okx-orange rounded-full animate-spin" />
+              Loading more loans…
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -192,11 +223,14 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function SummaryCard({ label, value, color = "text-white" }: { label: string; value: number; color?: string }) {
+function SummaryCard({ label, value, color = "text-white", loading }: { label: string; value: number; color?: string; loading?: boolean }) {
   return (
     <div className="px-4 py-3 rounded-lg bg-okx-card border border-okx-border">
       <div className="text-okx-dim text-[10px] mb-1">{label}</div>
-      <div className={`text-2xl font-bold ${color}`}>{value}</div>
+      <div className={`text-2xl font-bold flex items-center gap-2 ${color}`}>
+        {value}
+        {loading && <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin opacity-40" />}
+      </div>
     </div>
   );
 }

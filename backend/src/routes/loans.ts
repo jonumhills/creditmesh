@@ -8,14 +8,16 @@ const loanManager = new LoanManager();
 const matchmaking = new MatchmakingService();
 
 /**
- * GET /api/loans
- * Return all loans in one call — avoids N+1 per-loan fetches from the frontend.
+ * GET /api/loans?limit=20&offset=0
+ * Paginated loan list, newest first. Default: limit=20, offset=0.
  * NOTE: must be defined before /:loanId to avoid route shadowing.
  */
-router.get("/", async (_req: Request, res: Response) => {
+router.get("/", async (req: Request, res: Response) => {
   try {
-    const loans = await loanManager.getAllLoans();
-    return res.json({ total: loans.length, loans });
+    const limit  = Math.min(parseInt(req.query.limit  as string) || 20, 50);
+    const offset = Math.max(parseInt(req.query.offset as string) || 0,  0);
+    const result = await loanManager.getLoansPage(limit, offset);
+    return res.json(result);
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
   }
