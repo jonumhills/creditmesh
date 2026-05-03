@@ -17,48 +17,48 @@ export function LoansPage() {
   const [error, setError]         = useState<string | null>(null);
   const [filter, setFilter]       = useState<"ALL" | "ACTIVE" | "REPAID" | "DEFAULTED">("ALL");
 
-  const loadAllPages = useCallback(async (nameMap: NameMap) => {
-    let offset = PAGE_SIZE;
-    let accumulated: Loan[] = [];
-    let hasMore = true;
-    setLoadingMore(true);
-    while (hasMore) {
-      try {
-        const res = await api.get<{ total: number; loans: Loan[]; hasMore: boolean }>(
-          `/loans?limit=${PAGE_SIZE}&offset=${offset}`
-        );
-        accumulated = [...accumulated, ...res.data.loans];
-        setLoans(prev => [...prev, ...res.data.loans]);
-        hasMore = res.data.hasMore;
-        offset += PAGE_SIZE;
-      } catch { break; }
-    }
-    setLoadingMore(false);
-  }, []);
-
   const load = useCallback(async () => {
     try {
-      const [firstPage, agentsRes] = await Promise.all([
-        api.get<{ total: number; loans: Loan[]; hasMore: boolean }>(`/loans?limit=${PAGE_SIZE}&offset=0`),
-        api.get("/agents"),
-      ]);
-
+      const agentsRes = await api.get("/agents");
       const nameMap: NameMap = {};
       for (const a of agentsRes.data.agents ?? []) {
         if (a.name) nameMap[a.wallet.toLowerCase()] = a.name;
       }
       setNames(nameMap);
-      setTotal(firstPage.data.total);
-      setLoans(firstPage.data.loans ?? []);
+
+      // First page — show immediately
+      const first = await api.get<{ total: number; loans: Loan[]; hasMore: boolean }>(
+        `/loans?limit=${PAGE_SIZE}&offset=0`
+      );
+      setTotal(first.data.total);
+      setLoans(first.data.loans ?? []);
       setError(null);
       setLoading(false);
 
-      if (firstPage.data.hasMore) loadAllPages(nameMap);
+      // Remaining pages — stream in background
+      if (first.data.hasMore) {
+        setLoadingMore(true);
+        const allLoans = [...(first.data.loans ?? [])];
+        let offset = PAGE_SIZE;
+        let hasMore = true;
+        while (hasMore) {
+          try {
+            const more = await api.get<{ total: number; loans: Loan[]; hasMore: boolean }>(
+              `/loans?limit=${PAGE_SIZE}&offset=${offset}`
+            );
+            allLoans.push(...(more.data.loans ?? []));
+            setLoans([...allLoans]);
+            hasMore = more.data.hasMore;
+            offset += PAGE_SIZE;
+          } catch { break; }
+        }
+        setLoadingMore(false);
+      }
     } catch (e: any) {
       setError(e.message);
       setLoading(false);
     }
-  }, [loadAllPages]);
+  }, []);
 
   useEffect(() => { load(); }, [load]);
 
