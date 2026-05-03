@@ -96,6 +96,21 @@ export class LoanManager {
     }
   }
 
+  async getAllLoans(): Promise<any[]> {
+    const escrow = getLoanEscrowContract();
+    const total = Number(await (escrow as any).nextLoanId?.() ?? 0);
+    if (total === 0) return [];
+
+    const results = await Promise.allSettled(
+      Array.from({ length: total }, (_, i) => this.getLoanDetails(i))
+    );
+
+    return results
+      .filter((r): r is PromiseFulfilledResult<any> => r.status === "fulfilled")
+      .map(r => r.value)
+      .sort((a: any, b: any) => b.id - a.id);
+  }
+
   async checkAndMarkDefaults(): Promise<number[]> {
     const escrow = getLoanEscrowContract(getSigner());
     const now    = Math.floor(Date.now() / 1000);

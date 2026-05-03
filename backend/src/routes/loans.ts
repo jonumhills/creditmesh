@@ -8,6 +8,20 @@ const loanManager = new LoanManager();
 const matchmaking = new MatchmakingService();
 
 /**
+ * GET /api/loans
+ * Return all loans in one call — avoids N+1 per-loan fetches from the frontend.
+ * NOTE: must be defined before /:loanId to avoid route shadowing.
+ */
+router.get("/", async (_req: Request, res: Response) => {
+  try {
+    const loans = await loanManager.getAllLoans();
+    return res.json({ total: loans.length, loans });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/**
  * GET /api/loans/lenders/active
  * Get all active lender terms.
  * NOTE: must be defined before /:loanId to avoid route shadowing.

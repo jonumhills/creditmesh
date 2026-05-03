@@ -16,8 +16,8 @@ export function LoansPage() {
 
   const load = useCallback(async () => {
     try {
-      const [audit, agentsRes] = await Promise.all([
-        api.get("/audit"),
+      const [loansRes, agentsRes] = await Promise.all([
+        api.get<{ total: number; loans: Loan[] }>("/loans"),
         api.get("/agents"),
       ]);
 
@@ -26,19 +26,7 @@ export function LoansPage() {
         if (a.name) nameMap[a.wallet.toLowerCase()] = a.name;
       }
       setNames(nameMap);
-
-      const total: number = audit.data.stats.totalLoans;
-      if (total === 0) { setLoans([]); setLoading(false); return; }
-
-      const results = await Promise.allSettled(
-        Array.from({ length: total }, (_, i) => api.get<Loan>(`/loans/${i}`).then(r => r.data))
-      );
-      const loaded = results
-        .filter((r): r is PromiseFulfilledResult<Loan> => r.status === "fulfilled")
-        .map(r => r.value)
-        .sort((a, b) => b.id - a.id);
-
-      setLoans(loaded);
+      setLoans(loansRes.data.loans ?? []);
       setError(null);
     } catch (e: any) {
       setError(e.message);
