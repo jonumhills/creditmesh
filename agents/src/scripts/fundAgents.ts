@@ -1,16 +1,13 @@
 /**
  * fundAgents.ts
  *
- * Funds all 11 agent wallets with testnet USDC on Ethereum Sepolia.
+ * Funds all agent wallets on Ethereum Sepolia:
+ *   - All agents  → USDC (for lending/borrowing)
+ *   - Lenders     → small ETH top-up (for approve + deposit + setTerms gas)
  *
- * Strategy:
- *   1. Use Sepolia faucet for ETH if needed
- *   2. Transfer USDC from the deployer wallet to each agent
- *      — transfer USDC from the deployer wallet
- *
- * Amounts (USDC, 6 decimals):
- *   Lenders   → 0.012 USDC  (deposit + gas)
- *   Borrowers → 0.008 USDC  (gas for registration + repayments)
+ * Amounts:
+ *   Lenders   → 0.012 USDC + 0.005 ETH (gas)
+ *   Borrowers → 0.008 USDC
  *
  * Run: npm run agents:fund
  */
@@ -28,26 +25,12 @@ const ERC20_ABI = [
 
 const AGENTS_FILE      = path.join(__dirname, "../../agents.json");
 const TESTNET_RPC      = process.env.SEPOLIA_RPC_URL || "https://ethereum-sepolia.publicnode.com";
-const LENDER_FUND      = "0.012";   // USDC
-const BORROWER_FUND    = "0.008";   // USDC
-const MIN_BALANCE      = "0.003";   // skip if already above this
+const LENDER_USDC      = "0.012";
+const BORROWER_USDC    = "0.008";
+const LENDER_ETH       = "0.005";   // gas for approve + deposit + setTerms
+const MIN_USDC         = "0.003";
+const MIN_ETH          = "0.002";   // skip ETH top-up if already above this
 const USDC_DECIMALS    = 6;
-
-// ── USDC transfer from deployer ───────────────────────────────────────────────
-
-async function fundWithUsdc(
-  usdcContract: ethers.Contract,
-  deployer: ethers.Wallet,
-  toAddress: string,
-  amountUsdc: string
-): Promise<string> {
-  const amount = ethers.parseUnits(amountUsdc, USDC_DECIMALS);
-  const tx = await usdcContract.connect(deployer).transfer(toAddress, amount);
-  await tx.wait();
-  return tx.hash;
-}
-
-// ── Main ──────────────────────────────────────────────────────────────────────
 
 async function main() {
   console.log("╔══════════════════════════════════════╗");
@@ -72,51 +55,74 @@ async function main() {
   const usdcContract = new ethers.Contract(usdcAddress, ERC20_ABI, provider);
 
   const deployerUsdc = await usdcContract.balanceOf(deployer.address);
+  const deployerEth  = await provider.getBalance(deployer.address);
   console.log(`Deployer: ${deployer.address}`);
-  console.log(`Deployer USDC balance: ${ethers.formatUnits(deployerUsdc, USDC_DECIMALS)} USDC\n`);
+  console.log(`  USDC: ${ethers.formatUnits(deployerUsdc, USDC_DECIMALS)}`);
+  console.log(`  ETH:  ${ethers.formatEther(deployerEth)}\n`);
 
   for (const agent of agents) {
-    const targetUsdc = agent.role === "LENDER" ? LENDER_FUND : BORROWER_FUND;
-    const current    = await usdcContract.balanceOf(agent.wallet.address);
-    const currentStr = parseFloat(ethers.formatUnits(current, USDC_DECIMALS));
+    const isLender    = agent.role === "LENDER";
+    const targetUsdc  = isLender ? LENDER_USDC : BORROWER_USDC;
+    const currentUsdc = parseFloat(ethers.formatUnits(
+      await usdcContract.balanceOf(agent.wallet.address), USDC_DECIMALS
+    ));
 
-    if (currentStr >= parseFloat(MIN_BALANCE)) {
-      console.log(`⏭  ${agent.name} (${agent.role}) — already has ${currentStr.toFixed(4)} USDC, skipping`);
-      continue;
+    console.log(`\n[${agent.name}] (${agent.role}) — ${agent.wallet.address}`);
+
+    // ── USDC ──────────────────────────────────────────────────────────────────
+    if (currentUsdc >= parseFloat(MIN_USDC)) {
+      console.log(`  ⏭  USDC: ${currentUsdc.toFixed(4)} — already funded, skipping`);
+    } else {
+      const needed = ethers.parseUnits(targetUsdc, USDC_DECIMALS);
+      const deployerBal = await usdcContract.balanceOf(deployer.address);
+      if (deployerBal < needed) {
+        console.log(`  ⚠  Deployer low on USDC, skipping`);
+      } else {
+        const tx = await usdcContract.connect(deployer).transfer(agent.wallet.address, needed);
+        await tx.wait();
+        console.log(`  ✓ USDC: sent ${targetUsdc} — tx: ${tx.hash}`);
+      }
     }
 
-    console.log(`\n💸 Funding ${agent.name} (${agent.role}) → ${agent.wallet.address}`);
-    console.log(`   Target: ${targetUsdc} USDC | Current: ${currentStr.toFixed(6)} USDC`);
-
-    try {
-      const deployerBal = await usdcContract.balanceOf(deployer.address);
-      const needed      = ethers.parseUnits(targetUsdc, USDC_DECIMALS);
-
-      if (deployerBal < needed) {
-        console.log(`   ⚠ Deployer low on USDC (${ethers.formatUnits(deployerBal, USDC_DECIMALS)}), skipping`);
-        continue;
+    // ── ETH (lenders only for gas) ────────────────────────────────────────────
+    if (isLender) {
+      const currentEth = parseFloat(ethers.formatEther(
+        await provider.getBalance(agent.wallet.address)
+      ));
+      if (currentEth >= parseFloat(MIN_ETH)) {
+        console.log(`  ⏭  ETH:  ${currentEth.toFixed(4)} — already has gas, skipping`);
+      } else {
+        const ethAmount = ethers.parseEther(LENDER_ETH);
+        const tx = await deployer.sendTransaction({
+          to:    agent.wallet.address,
+          value: ethAmount,
+        });
+        await tx.wait();
+        console.log(`  ✓ ETH:  sent ${LENDER_ETH} ETH — tx: ${tx.hash}`);
       }
-
-      const txHash = await fundWithUsdc(usdcContract, deployer, agent.wallet.address, targetUsdc);
-      console.log(`   ✓ Sent ${targetUsdc} USDC — tx: ${txHash}`);
-    } catch (err: any) {
-      console.log(`   ❌ Transfer failed: ${err.message}`);
     }
 
     await new Promise((r) => setTimeout(r, 1000));
   }
 
-  // Final balance report
-  console.log("\n── Final USDC Balances ─────────────────────────────────────────");
+  // ── Final balances ────────────────────────────────────────────────────────
+  console.log("\n── Final Balances ──────────────────────────────────────────────");
+  console.log("Name               Role       USDC       ETH");
+  console.log("────────────────────────────────────────────────────────────────");
   for (const agent of agents) {
-    const bal    = await usdcContract.balanceOf(agent.wallet.address);
-    const amount = parseFloat(ethers.formatUnits(bal, USDC_DECIMALS));
-    const icon   = amount >= parseFloat(MIN_BALANCE) ? "✓" : "✗";
-    console.log(`${icon} ${agent.name.padEnd(18)} ${agent.role.padEnd(8)} ${amount.toFixed(6)} USDC   ${agent.wallet.address}`);
+    const usdc = parseFloat(ethers.formatUnits(
+      await usdcContract.balanceOf(agent.wallet.address), USDC_DECIMALS
+    ));
+    const eth = parseFloat(ethers.formatEther(
+      await provider.getBalance(agent.wallet.address)
+    ));
+    const ok = usdc >= parseFloat(MIN_USDC) ? "✓" : "✗";
+    console.log(`${ok} ${agent.name.padEnd(18)} ${agent.role.padEnd(10)} ${usdc.toFixed(4)} USDC  ${eth.toFixed(4)} ETH`);
   }
 
-  const deployerFinal = await usdcContract.balanceOf(deployer.address);
-  console.log(`\nDeployer remaining: ${ethers.formatUnits(deployerFinal, USDC_DECIMALS)} USDC`);
+  const finalEth  = await provider.getBalance(deployer.address);
+  const finalUsdc = await usdcContract.balanceOf(deployer.address);
+  console.log(`\nDeployer remaining: ${ethers.formatEther(finalEth)} ETH  |  ${ethers.formatUnits(finalUsdc, USDC_DECIMALS)} USDC`);
   console.log("\nNext: npm run agents:bootstrap\n");
 }
 

@@ -84,7 +84,7 @@ Without a productive use of capital, borrowing is circular — agents borrow and
 
 This makes CreditMesh agents genuine Uniswap participants. They don't interact with Uniswap because a human told them to — they do it because it's the optimal strategy for deploying borrowed capital. The agent decides the swap size, timing, and when to close.
 
-**Implementation:** `agents/src/utils/uniswap.ts` — `swapUsdcToWeth()` and `swapWethToUsdc()` via SwapRouter02 on Sepolia (`0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48`), with Uniswap Trading API for quotes.
+**Implementation:** `agents/src/utils/uniswap.ts` — `swapUsdcToWeth()` and `swapWethToUsdc()` via SwapRouter02 on Sepolia (`0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E`), with Uniswap Trading API for quotes.
 
 ---
 

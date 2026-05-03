@@ -6,23 +6,18 @@
 
 const names = new Map<string, string>([
   // ── Lenders ───────────────────────────────────────────────────────────────
-  ["0x387530a48c292b9ed217f7ad7ada6886086d8320", "VaultKeeper"],
-  ["0xbed68f221e02a3a46e6e159e64aba36abe30d072", "SteadyYield"],
-  ["0x802fa506cd698643907bd994265561b21b82956c", "AlphaYield"],
-  ["0x0e4e0d58e58a24d7bc31bca1f8da66ac46d06e64", "LiquidityPool"],
+  ["0xfe7de720bf49464653e1b45c6a36fa3676e0c7e3", "VaultKeeper"],
+  ["0x21fc7a5728fb0d3d9518212ac8293185f4b1d272", "SteadyYield"],
+  ["0xda6be63b0059a9ba51898e40c0abf18077b1a75c", "AlphaYield"],
+  ["0x2997a2b43791d7d46df75c955d62abc8aa44fa16", "LiquidityPool"],
   // ── Borrowers ─────────────────────────────────────────────────────────────
-  ["0x32786faa7b2d976f4f4d8509d5954ff03b1bb39f", "DeFiTrader"],
-  ["0x619c630e37d1a4138ed542806a9a34ea5dce7bd8", "ArbitrageBot"],
-  ["0xe150ff69dfd95f58004218674fa0a1110fd0b6b8", "LiquidityMiner"],
-  ["0xffed2cf3c2a7e9604af1464c6c02cc9e9e8c9099", "YieldOptimiser"],
-  ["0x8f52d87de1a0cd52a713b111f4ea4a10716f43ca", "NewAgent"],
-  ["0x69d0fa5868b19b3978a176d58c3cd529e37207f8", "FlashBorrower"],
-  ["0x205672398558715148fd3cd39edd0e1dc97e18b6", "StrategyAgent"],
-  // ── OpenClaw agents ───────────────────────────────────────────────────────
-  ["0xbdb99ce5db43a0dadddfcf467f2a2d828094b00e", "Choki-Lender"],
-  ["0xac117c56e6bcb662aa21331351c35a09df1b36cf", "Choki-Borrower"],
-  // ── Hackathon demo lender ─────────────────────────────────────────────────
-  ["0xaa7164f726ec646b3b38fe7ccc7c4ccf80514946", "ManojLender"],
+  ["0x384561f239364b0c088844d7051e989430a2d7fb", "DeFiTrader"],
+  ["0x16e4e6232f1a2ddf44294b8dc6ea4a8f89034533", "ArbitrageBot"],
+  ["0x7e74bb5b5ced53ac73ffca0722812727cabbc6d7", "LiquidityMiner"],
+  ["0x6604dac44ab13d5fd8dd528458b5b08f784aac80", "YieldOptimiser"],
+  ["0x4b579917a7d4fd9f3f11b4c5c9bbc8ccb61235b8", "NewAgent"],
+  ["0xd55da79cb1364c8e067607f6a15b42cdfec90f00", "FlashBorrower"],
+  ["0x67796f67d554377daee4dc0d18fc19a6505a2f02", "StrategyAgent"],
 ]);
 
 export function setName(wallet: string, name: string) {
